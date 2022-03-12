@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "lib": ["es2020", "DOM"],
+        "module": "commonjs",
+        "target": "esnext",
+        "noImplicitAny": true,
+        "outDir": "dist",
+        "sourceMap": true,   
+        "declaration": false,
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "allowJs": true
+    },
+    "exclude": ["webpack*", "dist"],
+  }

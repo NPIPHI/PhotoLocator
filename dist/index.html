@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Locator</title>
+    <style>
+        body {
+            color: gray;
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            align-content: center;
+            background-color: lightblue;
+            border-color: black;
+            border-style: solid;
+        }
+
+        button {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="images_button">Open Images</button>
+        <button id="shape_button">Open Shape</button>
+        <button id="save_button">Save Modifications</button>
+    </div>
+    <div id="map">
+    
+    <script src="bundle.js"></script>
+</body>
+</html>
