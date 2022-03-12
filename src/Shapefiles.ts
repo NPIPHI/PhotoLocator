@@ -33,7 +33,9 @@ async function load_shapefile(filename: string, dest_projection: string, folder:
 
     shapes.features.forEach(f=>{
         if(f.bbox) f.bbox = null;
-        if(f.geometry.type == "Polygon"){
+        if(f.geometry.type == "Point"){
+            f.geometry.coordinates = projection.forward(f.geometry.coordinates);
+        } else if(f.geometry.type == "Polygon"){
             for(let i = 0; i < f.geometry.coordinates.length; i++){
                 for(let j = 0; j < f.geometry.coordinates[i].length; j++){
                     f.geometry.coordinates[i][j] = projection.forward(f.geometry.coordinates[i][j])
@@ -47,7 +49,11 @@ async function load_shapefile(filename: string, dest_projection: string, folder:
                     }
                 }
             }
-        }else {
+        } else if(f.geometry.type == "LineString" || f.geometry.type == "MultiPoint"){
+            for(let i = 0; i < f.geometry.coordinates.length; i++){
+                f.geometry.coordinates[i] = projection.forward(f.geometry.coordinates[i])
+            }
+        } else {
             throw `bad shape type: ${f.geometry.type}` 
         }
     })
