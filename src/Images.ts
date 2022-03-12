@@ -138,6 +138,8 @@ export async function load_images(folder: FileSystemHandle[]): Promise<{layers: 
                 icons.push(make_image_icon(lat, lon, url, (lat,lon)=>{
                     mod_map.set(f, [lat, lon]);
                 }));
+            } else {
+                alert(`${f.name} won't render because it is missing exif data`)
             }
         }
     }
