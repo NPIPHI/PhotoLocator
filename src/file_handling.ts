@@ -1,4 +1,10 @@
 export async function get_folder(): Promise<FileSystemFileHandle[]> {
+    if(!window.showDirectoryPicker){
+        alert("Your browser does not support the required filesystem apis, try using Chrome or the new Edge");
+        throw "No Directory Picker";
+    }
+
+
     let ret: FileSystemFileHandle[] = [];
     
     const folder = await window.showDirectoryPicker({});
@@ -18,6 +24,10 @@ export async function get_folder(): Promise<FileSystemFileHandle[]> {
 }
 
 export async function get_file(): Promise<FileSystemFileHandle> {
+    if(!window.showDirectoryPicker){
+        alert("Your browser does not support the required filesystem apis, try using Chrome or the new Edge");
+        throw "No Directory Picker";
+    }
     const files = await window.showOpenFilePicker({multiple: false});
     return files[0];
 }
