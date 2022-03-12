@@ -69,7 +69,7 @@ function style_function(feature: any): Style {
 
 const translate = new Translate({
     filter: (feat, layer) => {
-        return !(layer instanceof TileLayer);
+        return !(layer instanceof TileLayer) && feat.getGeometry().getType() == "Point";
     }
 })
   
