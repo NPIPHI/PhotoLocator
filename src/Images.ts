@@ -46,7 +46,7 @@ function style(feature: any): Style {
 function image_style(image_url: string){
     return new Style({
         image: new Icon({
-            anchor: [0,0],
+            anchor: [0.5,0.5],
             anchorXUnits: 'fraction',
             anchorYUnits: 'fraction',
             src: image_url,
