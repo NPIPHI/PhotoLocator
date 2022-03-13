@@ -133,7 +133,7 @@ function text_style(text: string){
     return new Style({
         text:new Text({
             text: text,
-            font: 'bold 15px Times New Roman',
+            font: 'italics 12px Calibri',
             offsetY: 25,
             fill: new Fill({color: 'rgb(0,0,0)'}),
             stroke: new Stroke({color: 'rgb(255,255,255)', width: 1})
