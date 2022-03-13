@@ -15,20 +15,33 @@ import { Translate, defaults } from 'ol/interaction';
 const images_button = <HTMLButtonElement>document.getElementById("images_button");
 const shape_button = <HTMLButtonElement>document.getElementById("shape_button");
 const save_button = <HTMLButtonElement>document.getElementById("save_button");
+const toggle_button = <HTMLButtonElement>document.getElementById("toggle_button");
 
 images_button.addEventListener('click', async ()=>{
     const files = await get_folder();
 
-    const {layers, modifications} = await load_images(files);
+    const {layer, modifications, icons} = await load_images(files);
     save_button.addEventListener('click', ()=>{
         modifications.forEach(([lat, lon], file)=>{
             save_exif_data(file, lat, lon);
         })
         modifications.clear();
     })
-    layers.forEach(layer=>{
-        map.addLayer(layer)
+
+    let are_icons = true;;
+
+    toggle_button.addEventListener('click', ()=>{
+        icons.forEach(icon=>{
+            if(are_icons){
+                icon.setStyleThumbnail();
+            } else {
+                icon.setStyleIcon();
+            }
+        })
+        are_icons = !are_icons;
     })
+    
+    map.addLayer(layer);
 });
 
 shape_button.addEventListener('click', async () => {

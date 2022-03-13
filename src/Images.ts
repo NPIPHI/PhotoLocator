@@ -1,46 +1,68 @@
 import { Feature } from "ol";
-import { Geometry, LineString, Point } from "ol/geom";
+import { Geometry, Point } from "ol/geom";
 import VectorSource from "ol/source/Vector";
 import { to_array_buffer, to_base64 } from "./Base64";
 import { extension_of } from "./file_handling"
 import { fromLonLat, toLonLat } from "ol/proj";
-import { Icon, Style, Stroke } from "ol/style";
+import { Icon, Style, Stroke, Text, Fill } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 const piexif = require("piexifjs");
+
+export class ImageIcon {
+    feature: Feature<Point>;
+    image_url: string;
+    image_name: string;
+    constructor(lat: number, lon: number, img_url: string, img_name: string, change_location_callback: (lat: number, lon: number)=>void){
+        this.image_url = img_url;
+        this.image_name = img_name;
+        this.feature = new Feature({
+            geometry: new Point(
+                fromLonLat([lon,lat])
+            )
+        });
+        this.feature.on('change', evt=>{
+            const coords = this.feature.getGeometry().getFlatCoordinates();
+            const [lon, lat] = toLonLat(coords);
+            change_location_callback(lat, lon);
+        });
+
+        this.setStyleIcon();
+    }
+
+    private text_style(text: string): Style {
+        return new Style({
+            text:new Text({
+                text: text,
+                font: 'bold 20px Times New Roman',
+                offsetY: 25,
+                fill: new Fill({color: 'rgb(0,0,0)'}),
+                stroke: new Stroke({color: 'rgb(255,255,255)', width: 1})
+            })
+        })
+    }
+
+    setStyleIcon(){
+        this.feature.setStyle([this.text_style(this.image_name), image_style("./image_marker.png")]);
+    }
+
+    setStyleThumbnail(){
+        this.feature.setStyle([this.text_style(this.image_name), image_style(this.image_url)]);
+    }
+}
 
 function to_img_url(image_contents: ArrayBuffer): string {
     const blob = new Blob( [ image_contents ] );
     return URL.createObjectURL( blob );
 }
 
-function make_image_icon(lat: number, lon: number, img_url: string, change_location_callback: (lat: number, lon: number)=>void): VectorLayer<VectorSource<Geometry>>{
-    const img_feature = new Feature({
-        geometry: new Point(
-            fromLonLat([lon,lat])
-        ),
-    });
-    img_feature.setStyle(image_style(img_url));  
-    img_feature.on('change', evt=>{
-        const coords = img_feature.getGeometry().getFlatCoordinates();
-        const [lon, lat] = toLonLat(coords);
-        change_location_callback(lat, lon);
-    })
-    const src = new VectorSource({
-        features: [
-            img_feature,
-        ],
-    });
-
-    const layer = new VectorLayer({
-        source: src,
-        style: style,
-    });
-
-    return layer;
-}
-
 function style(feature: any): Style {
     return styles.image;
+}
+
+function point_style(image_url: string): Style {
+    return new Style({
+        geometry: new Point([0,0])
+    })
 }
 
 function image_style(image_url: string){
@@ -121,7 +143,7 @@ function insert_exif(data: ArrayBuffer, exif: any): ArrayBuffer {
     return to_array_buffer(new_file.slice("data:image/jpeg;base64,".length));
 }
 
-export async function load_images(folder: FileSystemHandle[]): Promise<{layers: VectorLayer<VectorSource<Geometry>>[], modifications: Map<FileSystemFileHandle, [number, number]>}> {
+export async function load_images(folder: FileSystemHandle[]): Promise<{layer: VectorLayer<VectorSource<Geometry>>, modifications: Map<FileSystemFileHandle, [number, number]>, icons: ImageIcon[]}> {
     const files = <FileSystemFileHandle[]>folder.filter(f=>f.kind == "file");
 
     let icons = [];
@@ -135,7 +157,7 @@ export async function load_images(folder: FileSystemHandle[]): Promise<{layers: 
             if(exif.GPS && (typeof exif.GPS[2] == 'object') && (typeof exif.GPS[4] == 'object')) {
                 const lat = from_dms(exif.GPS[piexif.GPSIFD.GPSLatitude], exif.GPS[piexif.GPSIFD.GPSLatitudeRef]);
                 const lon = from_dms(exif.GPS[piexif.GPSIFD.GPSLongitude], exif.GPS[piexif.GPSIFD.GPSLongitudeRef]);
-                icons.push(make_image_icon(lat, lon, url, (lat,lon)=>{
+                icons.push(new ImageIcon(lat, lon, url, f.name, (lat,lon)=>{
                     mod_map.set(f, [lat, lon]);
                 }));
             } else {
@@ -144,5 +166,13 @@ export async function load_images(folder: FileSystemHandle[]): Promise<{layers: 
         }
     }
 
-    return {layers: icons, modifications: mod_map};
+    const source = new VectorSource({
+        features: icons.map(i=>i.feature)
+    })
+
+    const layer = new VectorLayer({
+        source: source
+    })
+
+    return {layer: layer, modifications: mod_map, icons: icons};
 } 
