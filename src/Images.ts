@@ -33,7 +33,7 @@ export class ImageIcon {
         return new Style({
             text:new Text({
                 text: text,
-                font: 'bold 20px Times New Roman',
+                font: 'bold 15px Times New Roman',
                 offsetY: 25,
                 fill: new Fill({color: 'rgb(0,0,0)'}),
                 stroke: new Stroke({color: 'rgb(255,255,255)', width: 1})
@@ -55,16 +55,6 @@ function to_img_url(image_contents: ArrayBuffer): string {
     return URL.createObjectURL( blob );
 }
 
-function style(feature: any): Style {
-    return styles.image;
-}
-
-function point_style(image_url: string): Style {
-    return new Style({
-        geometry: new Point([0,0])
-    })
-}
-
 function image_style(image_url: string){
     return new Style({
         image: new Icon({
@@ -75,15 +65,6 @@ function image_style(image_url: string){
             scale: 0.1,
         }),
     });
-}
-
-const styles = {
-    image: new Style({
-        stroke: new Stroke({
-            color: 'red',
-            width: 100,
-        })
-    })
 }
 
 type Dms = [[number,number],[number,number],[number,number]];

@@ -13,9 +13,14 @@ async function load_projection(file: FileSystemFileHandle, dest_projection: stri
     return projection;
 }
 
-async function load_shapefile(filename: string, dest_projection: string, folder: FileSystemHandle[]): Promise<Feature<Geometry>[]>{
+
+export type DbfFeature = Feature<Geometry> & {dbf_properties?: any}
+
+async function load_shapefile(filename: string, dest_projection: string, folder: FileSystemHandle[]): Promise<{features: DbfFeature[], dbf_props: string[]}>{
     const proj_file = <FileSystemFileHandle>folder.find(f=>f.name == `${filename}.prj`);
     const shape_file = <FileSystemFileHandle>folder.find(f=>f.name == `${filename}.shp`);
+    const dbf_file = <FileSystemFileHandle>folder.find(f=>f.name == `${filename}.dbf`);
+
     const projection = await (async ()=>{
         if(!proj_file){
             console.warn(`file ${filename}.prj not found defaulting to EPSG:3857`);
@@ -26,7 +31,15 @@ async function load_shapefile(filename: string, dest_projection: string, folder:
     })()
     
     const contents = await (await shape_file.getFile()).arrayBuffer();
-    const shapes = await shapefile.read(contents);
+    const dbf = await (async ()=>{
+        if(dbf_file){
+            return await (await dbf_file.getFile()).arrayBuffer();
+        } else {
+            console.warn(`file ${filename}.dbf not found, metadata missing`);
+            return null;
+        }
+    })();
+    const shapes = await shapefile.read(contents, dbf);
     if(shapes.bbox){
         shapes.bbox = null;
     }
@@ -58,11 +71,19 @@ async function load_shapefile(filename: string, dest_projection: string, folder:
         }
     })
 
-    return await new GeoJSON({featureProjection: "ESRI:102671"}).readFeatures(shapes);
+    const geo_json = <DbfFeature[]>await new GeoJSON({featureProjection: "ESRI:102671"}).readFeatures(shapes);
+
+    for(let i = 0; i < geo_json.length; i++){
+        geo_json[i].dbf_properties = shapes.features[i].properties
+    }
+
+    const dbf_props = Object.keys(shapes.features[0]?.properties);
+
+    return {features: geo_json, dbf_props: dbf_props};
 }
 
-export async function load_shapefiles(filename: string, dest_projection: string, folder: FileSystemHandle[]): Promise<Feature<Geometry>[]>{
-    const shape_files = folder.filter(f=>{
+export async function load_shapefiles(filename: string, dest_projection: string, folder: FileSystemHandle[]): Promise<{shapefiles: {name: string, features: DbfFeature[]}[], props: string[]}>{
+    const shape_file_names = folder.filter(f=>{
         if(f instanceof FileSystemFileHandle){
             return extension_of(f) == "shp";
         } else {
@@ -70,11 +91,20 @@ export async function load_shapefiles(filename: string, dest_projection: string,
         }
     }).map(f=>f.name.slice(0, f.name.length - ".shp".length));
 
-    let ret: Feature<Geometry>[] = [];
-    for(const name of shape_files){
+    let props: string[] = [];
+    let shapefiles: {
+        name: string;
+        features: DbfFeature[];
+    }[] = [];
+
+    for(const name of shape_file_names){
         const shapes = await load_shapefile(name, dest_projection, folder);
-        shapes.forEach(s=>ret.push(s));
+        shapefiles.push({features: shapes.features, name: name});
+        shapes.dbf_props.forEach(p=>{
+            if(props.indexOf(p) == -1) props.push(p);
+        });
+        
     }
 
-    return ret;
+    return {shapefiles: shapefiles, props: props};
 }
