@@ -6,6 +6,7 @@ import { extension_of } from "./file_handling"
 import { fromLonLat, toLonLat } from "ol/proj";
 import { Icon, Style, Stroke, Text, Fill } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
+import { Coordinate } from "ol/coordinate";
 const piexif = require("piexifjs");
 
 export class ImageIcon {
@@ -124,7 +125,7 @@ function insert_exif(data: ArrayBuffer, exif: any): ArrayBuffer {
     return to_array_buffer(new_file.slice("data:image/jpeg;base64,".length));
 }
 
-export async function load_images(folder: FileSystemHandle[]): Promise<{layer: VectorLayer<VectorSource<Geometry>>, modifications: Map<FileSystemFileHandle, [number, number]>, icons: ImageIcon[]}> {
+export async function load_images(folder: FileSystemHandle[], default_location: Coordinate): Promise<{layer: VectorLayer<VectorSource<Geometry>>, modifications: Map<FileSystemFileHandle, [number, number]>, icons: ImageIcon[]}> {
     const files = <FileSystemFileHandle[]>folder.filter(f=>f.kind == "file");
 
     let icons = [];
@@ -142,7 +143,11 @@ export async function load_images(folder: FileSystemHandle[]): Promise<{layer: V
                     mod_map.set(f, [lat, lon]);
                 }));
             } else {
-                alert(`${f.name} won't render because it is missing exif data`)
+                const [lon, lat] = toLonLat(default_location);
+                alert(`${f.name} missing exif gps data, defaulted to ${lat}, ${lon}`);
+                icons.push(new ImageIcon(lat, lon, url, f.name, (lat,lon)=>{
+                    mod_map.set(f, [lat, lon]);
+                }));
             }
         }
     }

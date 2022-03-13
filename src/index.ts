@@ -23,7 +23,7 @@ const shape_selector_table = <HTMLDivElement>document.getElementById("shape_sele
 images_button.addEventListener('click', async ()=>{
     const files = await get_folder();
 
-    const {layer, modifications, icons} = await load_images(files);
+    const {layer, modifications, icons} = await load_images(files, map.getView().getCenter());
     save_button.addEventListener('click', ()=>{
         modifications.forEach(([lat, lon], file)=>{
             save_exif_data(file, lat, lon);
@@ -92,7 +92,6 @@ shape_button.addEventListener('click', async () => {
     section_id.checked = true;
 
     let selected_props = ["BRANCHID", "SECTIONID"];
-    let selected_layers = [];
 
     const center = shapefiles[0]?.features[0]?.getGeometry().getClosestPoint([0,0]) || [0,0];
 
