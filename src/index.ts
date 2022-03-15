@@ -101,8 +101,8 @@ shape_button.addEventListener('click', async () => {
     const branch_id = <HTMLInputElement>document.getElementById("select_BRANCHID");
     const section_id = <HTMLInputElement>document.getElementById("select_SECTIONID");
 
-    branch_id.checked = true;
-    section_id.checked = true;
+    if(branch_id) branch_id.checked = true;
+    if(section_id) section_id.checked = true;
 
     let selected_props = ["BRANCHID", "SECTIONID"];
 

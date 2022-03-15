@@ -62,7 +62,7 @@ async function load_shapefile(filename: string, dest_projection: string, folder:
         if (f.bbox) f.bbox = null;
         if (f.geometry.type == "Point") {
             f.geometry.coordinates = projection.forward(f.geometry.coordinates);
-        } else if (f.geometry.type == "Polygon") {
+        } else if (f.geometry.type == "Polygon" || f.geometry.type == "MultiLineString") {
             for (let i = 0; i < f.geometry.coordinates.length; i++) {
                 for (let j = 0; j < f.geometry.coordinates[i].length; j++) {
                     f.geometry.coordinates[i][j] = projection.forward(f.geometry.coordinates[i][j])
