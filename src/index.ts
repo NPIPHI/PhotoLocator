@@ -101,10 +101,17 @@ shape_button.addEventListener('click', async () => {
     const branch_id = <HTMLInputElement>document.getElementById("select_BRANCHID");
     const section_id = <HTMLInputElement>document.getElementById("select_SECTIONID");
 
-    if(branch_id) branch_id.checked = true;
-    if(section_id) section_id.checked = true;
+    let selected_props: string[] = [];
 
-    let selected_props = ["BRANCHID", "SECTIONID"];
+    if(branch_id) {
+        branch_id.checked = true;
+        selected_props.push("BRANCHID");
+    }
+
+    if(section_id) {
+        section_id.checked = true;
+        selected_props.push("SECTIONID");
+    }
 
     const center = shapefiles[0]?.features[0]?.getGeometry().getClosestPoint([0, 0]) || [0, 0];
 
