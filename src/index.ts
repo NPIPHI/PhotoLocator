@@ -93,7 +93,7 @@ shape_button.addEventListener('click', async () => {
 
     props.map(p => make_selector(p, (prop, val) => {
         set_array_element(selected_props, prop, val);
-        layers.forEach(layer => layer.setStyle(style_function(selected_props)));
+        shapefiles.forEach(shape=>shape.features.forEach(f=>f.setStyle(style_function(f, selected_props))));
     })).forEach(checkbox => {
         prop_selector_table.appendChild(checkbox);
     });
@@ -119,13 +119,16 @@ shape_button.addEventListener('click', async () => {
         const selector = make_selector(shape.name, (name, val) => { layer.setVisible(val) });
         (selector.children[0] as HTMLInputElement).checked = true;
 
+
+        shape.features.forEach(feature=>feature.setStyle(style_function(feature, selected_props)));
+
         shape_selector_table.appendChild(selector);
         const vector_source = new VectorSource({
             features: shape.features,
         })
         const layer = new VectorLayer({
             source: vector_source,
-            style: style_function(selected_props),
+            // style: style_function(selected_props),
         })
 
         return layer;
@@ -165,26 +168,23 @@ function text_style(text: string) {
  * @param name_selector which feature properties to display
  * @returns function that can styles shapefiles with the proper displayed properties
  */
-function style_function(name_selector: string[]): (feature: DbfFeature) => Style[] {
-    return (feature: DbfFeature) => {
-        let text = name_selector.map(name => {
-            const val = feature.dbf_properties[name];
-            if (val === undefined || val === null) {
-                return `[MISSING ${name}]`;
-            } else {
-                return val;
-            }
-        }).join('-');
-
-
-        if (text.length > 40) {
-            text = text.slice(0, 40) + "...";
-        }
-        if (text) {
-            return [LineStringStyle, text_style(text)];
+function style_function(feature: DbfFeature, name_selector: string[]): Style[] {
+    let text = name_selector.map(name => {
+        const val = feature.dbf_properties[name];
+        if (val === undefined || val === null) {
+            return `[NO ${name}]`;
         } else {
-            return [LineStringStyle];
+            return val;
         }
+    }).join('-');
+
+    if (text.length > 40) {
+        text = text.slice(0, 40) + "...";
+    }
+    if (text) {
+        return [LineStringStyle, text_style(text)];
+    } else {
+        return [LineStringStyle];
     }
 }
 
