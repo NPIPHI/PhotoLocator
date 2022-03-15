@@ -164,9 +164,9 @@ function text_style(text: string) {
 }
 
 /**
- * Creates a function that styles the shapefile with the correct properties displayed
+ * Styles the shapefile with the correct properties displayed
  * @param name_selector which feature properties to display
- * @returns function that can styles shapefiles with the proper displayed properties
+ * @returns array of styles for the given feature
  */
 function style_function(feature: DbfFeature, name_selector: string[]): Style[] {
     let text = name_selector.map(name => {
