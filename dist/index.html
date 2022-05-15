@@ -69,6 +69,15 @@
         .display_selector {
             display: flex;
         }
+
+        .saved {
+            opacity: 0.3;
+        }
+
+        .unsaved {
+            border-color: blue;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body> 
@@ -76,7 +85,7 @@
         <div class="controls">
             <button id="images_button">Open Images</button>
             <button id="shape_button">Open Shape</button>
-            <button id="save_button">Save Modifications</button>
+            <button class="saved" id="save_button">Save Modifications</button>
             <button id="toggle_button">Toggle Thumbnail</button>
             <button id="toggle_image_names">Toggle Image Names</button>
         </div>

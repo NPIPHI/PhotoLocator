@@ -176,7 +176,9 @@ export class Shapefile {
     private text_style(feature: DbfFeature, props: string[]){
         return new Style({
             text: new Text({
-                text: this.text_of(feature, props)
+                text: this.text_of(feature, props),
+                font: "bold 15px Calibri",
+                fill: new Fill({ color: [0,0,255] }),
             })
         })
     }

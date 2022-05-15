@@ -35,10 +35,12 @@ image_table.appendChild(image_list);
 
 export function set_confirm_exit(){
     should_confirm_exit = true;
+    save_button.className = "unsaved";
 }
 
 export function unset_confirm_exit(){
     should_confirm_exit = false;
+    save_button.className = "saved";
 }
 
 window.close = ()=>{
@@ -161,31 +163,6 @@ function text_style(text: string) {
             stroke: new Stroke({ color: 'rgb(255,255,255)', width: 1 })
         })
     })
-}
-
-/**
- * Styles the shapefile with the correct properties displayed
- * @param name_selector which feature properties to display
- * @returns array of styles for the given feature
- */
-function style_function(feature: DbfFeature, name_selector: string[]): Style[] {
-    let text = name_selector.map(name => {
-        const val = feature.dbf_properties[name];
-        if (val === undefined || val === null) {
-            return `[NO ${name}]`;
-        } else {
-            return val;
-        }
-    }).join('-');
-
-    if (text.length > 40) {
-        text = text.slice(0, 40) + "...";
-    }
-    if (text) {
-        return [LineStringStyle, text_style(text)];
-    } else {
-        return [LineStringStyle];
-    }
 }
 
 const translate = new Translate({
