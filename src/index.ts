@@ -15,6 +15,7 @@ import VectorImageLayer from 'ol/layer/VectorImage';
 import { ShapefileList } from './ui/ShapefileList';
 import { SelectionElement } from './ui/SelectorArray';
 import { PhotoList } from './ui/PhotoList';
+import { ShapeFileLoadList } from './ui/ShapefileLoadList';
 
 
 const images_button = <HTMLButtonElement>document.getElementById("images_button");
@@ -126,23 +127,51 @@ images_button.addEventListener('click', async () => {
     map.addLayer(layer);
 });
 
+function pick_loaded_shapefiles(folder: FileSystemFileHandle[]): Promise<string[]>{
+    const props = folder.filter(f=>f.name.endsWith(".shp")).map(f=>f.name).map(n=>{return {prop: n, val: false}});
+    const ele = new ShapeFileLoadList(props);
+
+    document.body.appendChild(ele);
+
+    return new Promise((res, rej)=>{
+        ele.addEventListener("load-shapefiles", (evt: CustomEvent)=>{
+            const arr: SelectionElement[] = evt.detail;
+            document.body.removeChild(ele);
+            res(arr.filter(v=>v.val).map(v=>v.prop));
+        });
+
+        ele.addEventListener("exit", ()=>{
+            document.body.removeChild(ele);
+            rej("user exit");
+        });
+    })
+}
+
+
+let in_shapefile_load_menu = false;
 /**
  * When the user clicks the load shape button, load the selected shapes onto the map
  */
 shape_button.addEventListener('click', async () => {
-    const folder = await get_folder();
-    const shapefiles = await load_shapefiles("EPSG:3857", folder);
+    if(in_shapefile_load_menu) return;
+    in_shapefile_load_menu = true;
+    try {
+        const folder = await get_folder();
+        const to_load = await pick_loaded_shapefiles(folder);
+        const shapefiles = await load_shapefiles("EPSG:3857", folder, to_load);
 
-    shapefiles.forEach(s=>map.addLayer(s.layer));
+        shapefiles.forEach(s=>map.addLayer(s.layer));
 
-    shapefiles.forEach(s=>shapefile_selector.add_shapefile(s));
+        shapefiles.forEach(s=>shapefile_selector.add_shapefile(s));
 
-    if(shapefiles.length > 0){
-        map.setView(new View({
-            center: shapefiles[0].features[0].getGeometry().getClosestPoint([0,0]),
-            zoom: 10
-        }))
-    }
+        if(shapefiles.length > 0){
+            map.setView(new View({
+                center: shapefiles[0].features[0].getGeometry().getClosestPoint([0,0]),
+                zoom: 10
+            }))
+        }
+    } catch(e){}
+    in_shapefile_load_menu = false;
 })
 
 const LineStringStyle =

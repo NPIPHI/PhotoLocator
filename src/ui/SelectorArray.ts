@@ -12,7 +12,7 @@ export class SelectorArray extends LitElement {
     @property()
     elements: SelectionElement[] = [];
 
-    update_selection(e: Event){
+    private update_selection(e: Event){
         if(e.target instanceof HTMLInputElement){
             const ele = this.elements.find(ele=>ele.prop == (e.target as any).name);
             ele.val = e.target.checked;
@@ -21,13 +21,13 @@ export class SelectorArray extends LitElement {
         this.dispatchEvent(new CustomEvent("selector-update", {detail: this.elements}))
     }
 
-    uncheck_all(){
+    private uncheck_all(){
         this.elements.forEach(e=>e.val = false);
         this.requestUpdate();
         this.dispatchEvent(new CustomEvent("selector-update", {detail: this.elements}))
     }
 
-    check_all(){
+    private check_all(){
         this.elements.forEach(e=>e.val = true);
         this.requestUpdate();
         this.dispatchEvent(new CustomEvent("selector-update", {detail: this.elements}))

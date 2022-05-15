@@ -110,14 +110,8 @@ async function load_shapefile(filename: string, dest_projection: string, folder:
  * @param folder folder to load shapefiles from
  * @returns array of shapefiles
  */
-export async function load_shapefiles(dest_projection: string, folder: FileSystemHandle[]): Promise<Shapefile[]> {
-    const shape_file_names = folder.filter(f => {
-        if (f instanceof FileSystemFileHandle) {
-            return extension_of(f) == "shp";
-        } else {
-            return false;
-        }
-    }).map(f => f.name.slice(0, f.name.length - ".shp".length));
+export async function load_shapefiles(dest_projection: string, folder: FileSystemHandle[], to_load: string[]): Promise<Shapefile[]> {
+    const shape_file_names = to_load.map(f => f.slice(0, f.length - ".shp".length));
 
     return Promise.all(shape_file_names.map(name=>{
         return load_shapefile(name, dest_projection, folder);
