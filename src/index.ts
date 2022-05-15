@@ -71,6 +71,15 @@ function set_layer_visible(shape: Shapefile, visible: boolean){
     shape.set_visible(visible);
 }
 
+shapefile_selector.addEventListener("focus-shapefile", (evt: CustomEvent)=>{
+    const shp: Shapefile = evt.detail;
+
+    map.setView(new View({
+        center: shp.features[0].getGeometry().getClosestPoint([0,0]),
+        zoom: 10
+    }))
+})
+
 image_list.addEventListener("focus-image", (evt: CustomEvent)=>{
     const img: ImageIcon = evt.detail;
     map.setView(new View({
@@ -116,39 +125,6 @@ images_button.addEventListener('click', async () => {
 });
 
 /**
- * Make a checkbox with a name
- * @param prop name to put next to checkbox
- * @param callback callback for when the checkbox is selected/deselected
- * @returns Div element containing checkbox and name
- */
-function make_selector(prop: string, callback: (prop: string, checked: boolean) => void): HTMLDivElement {
-    const div = document.createElement("div");
-    div.className = "display_selector";
-    const text = document.createElement("div");
-    text.innerText = prop;
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.addEventListener('click', evt => {
-        callback(prop, input.checked);
-    });
-    input.id = `select_${prop}`;
-    div.appendChild(input);
-    div.appendChild(text);
-    return div;
-}
-
-function set_array_element(arr: string[], prop: string, set: boolean) {
-    if (set) {
-        if (arr.indexOf(prop) == -1) arr.push(prop);
-    } else {
-        const idx = arr.indexOf(prop);
-        if (idx != -1) {
-            arr.splice(idx, 1);
-        }
-    }
-}
-
-/**
  * When the user clicks the load shape button, load the selected shapes onto the map
  */
 shape_button.addEventListener('click', async () => {
@@ -165,51 +141,6 @@ shape_button.addEventListener('click', async () => {
             zoom: 10
         }))
     }
-
-    // props.map(p => make_selector(p, (prop, val) => {
-    //     set_array_element(selected_props, prop, val);
-    //     shapefiles.forEach(shape=>shape.features.forEach(f=>f.setStyle(style_function(f, selected_props))));
-    // })).forEach(checkbox => {
-    //     prop_selector_table.appendChild(checkbox);
-    // });
-
-    // const branch_id = <HTMLInputElement>document.getElementById("select_BRANCHID");
-    // const section_id = <HTMLInputElement>document.getElementById("select_SECTIONID");
-
-    // let selected_props: string[] = [];
-
-    // if(branch_id) {
-    //     branch_id.checked = true;
-    //     selected_props.push("BRANCHID");
-    // }
-
-    // if(section_id) {
-    //     section_id.checked = true;
-    //     selected_props.push("SECTIONID");
-    // }
-
-    // const center = shapefiles[0]?.features[0]?.getGeometry().getClosestPoint([0, 0]) || [0, 0];
-
-    // const layers = shapefiles.map(shape => {
-    //     const selector = make_selector(shape.name, (name, val) => { layer.setVisible(val) });
-    //     (selector.children[0] as HTMLInputElement).checked = true;
-
-
-    //     shape.features.forEach(feature=>feature.setStyle(style_function(feature, selected_props)));
-
-    //     shape_selector_table.appendChild(selector);
-    //     const vector_source = new VectorSource({
-    //         features: shape.features,
-    //     })
-    //     const layer = new VectorImageLayer({
-    //         source: vector_source,
-    //         // style: style_function(selected_props),
-    //     })
-
-    //     return layer;
-    // });
-
-    // layers.forEach(layer => map.addLayer(layer));
 })
 
 const LineStringStyle =

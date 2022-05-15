@@ -30,6 +30,10 @@ export class ShapefileToggle extends LitElement {
         this.dispatchEvent(new CustomEvent("display-prop-change", {detail: e.detail}))
     }
 
+    private focus_shapefile(){
+        this.dispatchEvent(new CustomEvent("focus-shapefile"))
+    }
+
 
     render() {
         return html`
@@ -38,6 +42,7 @@ export class ShapefileToggle extends LitElement {
                 ${this.name} 
                 <button @click=${this.toggle_props_visibility}>${this.is_props_hidden ? "Show Prop List" : "Hide Prop List"}</button>
                 <button @click=${this.toggle_layer_visibility}>${this.is_layer_hidden ? "Show Layer" : "Hide Layer"}</button>
+                <button @click=${this.focus_shapefile}>Focus</button>
             </div>
             <div ?hidden=${this.is_props_hidden}><selector-array @selector-update=${this.bubble_prop_update} .elements=${this.prop_list}></selector-array></div>
         </div>
@@ -67,6 +72,10 @@ export class ShapefileList extends LitElement {
         this.dispatchEvent(new CustomEvent("shapefile-visible-update", {detail: {shapefile: shp, visible: visible}}));
     }
 
+    private focus_shapefile(shp: Shapefile){
+        this.dispatchEvent(new CustomEvent("focus-shapefile", {detail: shp}));
+    }
+
     static styles = css`
         .container {
             border: 1px solid black;
@@ -81,6 +90,7 @@ export class ShapefileList extends LitElement {
                     <shapefile-toggle 
                         @display-prop-change=${(e: CustomEvent)=>{this.display_prop_change(shp, e.detail)}}
                         @layer-visibility-update=${(e: CustomEvent)=>{this.layer_visibility_change(shp, e.detail)}} 
+                        @focus-shapefile=${()=>this.focus_shapefile(shp)}
                         .prop_list=${shp.props.map(p=>({prop: p, val: false}))}
                         .name=${shp.name}>
                     </shapefile-toggle>
