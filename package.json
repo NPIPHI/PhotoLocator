@@ -13,6 +13,7 @@
     "@types/shapefile": "^0.6.1",
     "@types/wicg-file-system-access": "^2020.9.5",
     "exif-js": "^2.3.0",
+    "lit": "^2.2.3",
     "ol": "^6.13.0",
     "piexifjs": "^1.0.4",
     "proj4": "^2.7.5",

@@ -7,7 +7,9 @@ import { fromLonLat, toLonLat } from "ol/proj";
 import { Icon, Style, Stroke, Text, Fill } from "ol/style";
 import VectorLayer from "ol/layer/Vector";
 import { Coordinate } from "ol/coordinate";
+import { set_confirm_exit } from "./index";
 const piexif = require("piexifjs");
+
 
 export class ImageIcon {
     feature: Feature<Point>;
@@ -27,7 +29,7 @@ export class ImageIcon {
             change_location_callback(lat, lon);
         });
 
-        this.setStyleIcon();
+        this.setStyle(false, false);
     }
 
     private text_style(text: string): Style {
@@ -42,12 +44,10 @@ export class ImageIcon {
         })
     }
 
-    setStyleIcon() {
-        this.feature.setStyle([this.text_style(this.image_name), image_style("./image_marker.png")]);
-    }
-
-    setStyleThumbnail() {
-        this.feature.setStyle([this.text_style(this.image_name), image_style(this.image_url)]);
+    setStyle(named: boolean, thumbnail: boolean){
+        const text = this.text_style(named ? this.image_name : '');
+        const image = image_style(thumbnail ? this.image_url : "./image_marker.png");
+        this.feature.setStyle([text, image]);
     }
 }
 
@@ -134,7 +134,7 @@ export async function save_exif_data(file: FileSystemFileHandle, lat: number, lo
 
     const writeable = await file.createWritable();
     writeable.write(new_file);
-    writeable.close();
+    await writeable.close();
 }
 
 /**
@@ -182,7 +182,7 @@ export async function load_images(folder: FileSystemHandle[], default_location: 
     let mod_map = new Map();
     for (const f of files) {
         const extension = extension_of(f);
-        if (extension == "jpeg" || extension == "jpg") {
+        if (extension == "jpeg" || extension == "jpg" || extension == "JPG" || extension == "JPEG") {
             const contents = await (await f.getFile()).arrayBuffer();
             const url = to_img_url(contents);
             const exif = await load_exif(contents);
@@ -191,6 +191,7 @@ export async function load_images(folder: FileSystemHandle[], default_location: 
                 const lon = from_dms(exif.GPS[piexif.GPSIFD.GPSLongitude], exif.GPS[piexif.GPSIFD.GPSLongitudeRef]);
                 icons.push(new ImageIcon(lat, lon, url, f.name, (lat, lon) => {
                     mod_map.set(f, [lat, lon]);
+                    set_confirm_exit();
                 }));
             } else {
                 const [lon, lat] = toLonLat(default_location);
