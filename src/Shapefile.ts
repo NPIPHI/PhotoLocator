@@ -162,16 +162,20 @@ export class Shapefile {
             } else {
                 return val;
             }
-        }).join('\n');
+        }).join('-');
 
-        return text;
+        if(text.length > 40){
+            return text.slice(0, 37) + "...";
+        } else {
+            return text;
+        }
     }
 
     private text_style(feature: DbfFeature, props: string[]){
         return new Style({
             text: new Text({
                 text: this.text_of(feature, props),
-                font: "bold 15px Calibri",
+                font: "bold 20px Calibri",
                 fill: new Fill({ color: [0,0,255] }),
             })
         })
