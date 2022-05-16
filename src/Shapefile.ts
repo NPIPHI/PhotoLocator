@@ -176,6 +176,9 @@ export class Shapefile {
             text: new Text({
                 text: this.text_of(feature, props),
                 font: "bold 20px Calibri",
+                stroke: new Stroke({
+                    color: [255,255,255]
+                }),
                 fill: new Fill({ color: [0,0,255] }),
             })
         })
