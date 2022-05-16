@@ -179,6 +179,7 @@ export class Shapefile {
                 stroke: new Stroke({
                     color: [255,255,255]
                 }),
+                overflow: true,
                 fill: new Fill({ color: [0,0,255] }),
             })
         })
